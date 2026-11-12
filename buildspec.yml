@@ -1,4 +1,9 @@
 version: 0.2
+
+env:
+  secrets-manager:
+    DOCKERHUB_USERNAME: "codebuild/dockerhub/DOCKERHUB_USERNAME"
+    DOCKERHUB_TOKEN: "codebuild/dockerhub/DOCKERHUB_TOKEN"
 phases:
   install:
     runtime-versions:
@@ -11,18 +16,20 @@ phases:
   pre_build:
     commands:
       - echo "Logging in to Docker Hub..."
+      - echo "$DOCKERHUB_TOKEN" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
+      
   build:
     commands:
       - echo "Building Java application..."
       - mvn clean package -DskipTests
       - echo "Building Docker image..."
-      - docker build -t docker.io/sanjeevsekar18/javaapp:latest .
+      - docker build -t $DOCKERHUB_USERNAME/javaapp:latest .
       - echo "Creating commit-specific Docker image..."
       - IMAGE_TAG=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
-      - docker tag docker.io/sanjeevsekar18/javaapp:latest docker.io/sanjeevsekar18/javaapp:$IMAGE_TAG
+      - docker tag $DOCKERHUB_USERNAME/javaapp:latest $DOCKERHUB_USERNAME/javaapp:$IMAGE_TAG
   post_build:
     commands:
       - echo "Pushing Docker images..."
-      - docker push docker.io/sanjeevsekar18/javaapp:latest
-      - docker push docker.io/sanjeevsekar18/javaapp:$IMAGE_TAG
+      - docker push $DOCKERHUB_USERNAME/javaapp:latest
+      - docker push $DOCKERHUB_USERNAME/javaapp:$IMAGE_TAG
       - echo "Docker images successfully pushed."
