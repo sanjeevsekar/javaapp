@@ -1,0 +1,28 @@
+version: 0.2
+phases:
+  install:
+    runtime-versions:
+      java: corretto17
+    commands:
+      - echo "Installing dependencies..."
+      - java -version
+      - mvn --version
+      - docker --version
+  pre_build:
+    commands:
+      - echo "Logging in to Docker Hub..."
+  build:
+    commands:
+      - echo "Building Java application..."
+      - mvn clean package -DskipTests
+      - echo "Building Docker image..."
+      - docker build -t docker.io/sanjeevsekar18/javaapp:latest .
+      - echo "Creating commit-specific Docker image..."
+      - IMAGE_TAG=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
+      - docker tag docker.io/sanjeevsekar18/javaapp:latest docker.io/sanjeevsekar18/javaapp:$IMAGE_TAG
+  post_build:
+    commands:
+      - echo "Pushing Docker images..."
+      - docker push docker.io/sanjeevsekar18/javaapp:latest
+      - docker push docker.io/sanjeevsekar18/javaapp:$IMAGE_TAG
+      - echo "Docker images successfully pushed."
