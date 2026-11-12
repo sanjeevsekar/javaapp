@@ -2,8 +2,8 @@ version: 0.2
 
 env:
   secrets-manager:
-    DOCKERHUB_USERNAME: "codebuild/dockerhub/DOCKERHUB_USERNAME"
-    DOCKERHUB_TOKEN: "codebuild/dockerhub/DOCKERHUB_TOKEN"
+    DOCKERHUB_USERNAME: "codebuild/dockerhub:DOCKERHUB_USERNAME"
+    DOCKERHUB_TOKEN: "codebuild/dockerhub:DOCKERHUB_TOKEN"
 phases:
   install:
     runtime-versions:
